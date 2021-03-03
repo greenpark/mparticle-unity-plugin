@@ -1,3 +1,36 @@
+# For GreenPark
+
+So you want to update the mParticle Unity plugin? Here's the steps.
+
+1. Clone this repo
+2. Clone [mparticle-apple-sdk](https://github.com/mParticle/mparticle-apple-sdk)
+3. Install [Carthage](https://github.com/Carthage/Carthage)
+4. Build Apple SDK using Carthage with one of:
+
+   ```
+   carthage build --no-skip-current --platform iOS
+
+   # or
+
+   carthage build --no-skip-current --use-xcframeworks
+   ```
+
+   The reason there are 2 commands is I have figured out which is actually needed. The first is what got it working for me initially but then I came across some new information that suggested that may have been just because I am on an M1 Mac and the second command is the preferred one. More testing needs to be done on this.
+
+5. Copy into the built framework into the mparticle-unity-plugin repo
+
+   ```
+   mv Carthage/Build/iOS/mParticle_Apple_SDK.framework [PATH-TO-mparticle-unity-sdk]/Assets/Plugins/iOS/
+   ```
+
+6. Build unity plugin
+
+   ```
+   ./buildscript.sh
+   ```
+
+7. Import into unity project
+
 <img src="https://static.mparticle.com/sdk/mp_logo_black.svg" width="280">
 
 ## Unity Plugin
@@ -10,7 +43,7 @@ Download and import the plugin package to get started:
 
 1.  Navigate to the [releases page](https://github.com/mParticle/mparticle-unity-plugin/releases), download `mParticle.unitypackage`
 2.  Open an existing Unity project or create a new project
-3.  Open the package directly, or import it to your project by selecting Assets -> Import Package -> Custom Package...  
+3.  Open the package directly, or import it to your project by selecting Assets -> Import Package -> Custom Package...
 
 ### iOS Setup
 
@@ -40,7 +73,7 @@ You can also configure Xcode manually by adding the required frameworks specifie
 
 ### mParticle Singleton
 
-The mParticle Unity package contains a class file named `MParticle.cs`, which is a Unity `Monobehavior` that exposes the mParticle API via `MParticle.Instance`.  The package also contains the classes `MParticleiOS` and `MParticleAndroid`. These classes are used by the mParticle singleton to interact with the native iOS and Android libraries. You should never access those classes directly from your code.
+The mParticle Unity package contains a class file named `MParticle.cs`, which is a Unity `Monobehavior` that exposes the mParticle API via `MParticle.Instance`. The package also contains the classes `MParticleiOS` and `MParticleAndroid`. These classes are used by the mParticle singleton to interact with the native iOS and Android libraries. You should never access those classes directly from your code.
 
 ### Initialization
 
@@ -61,10 +94,10 @@ namespace MyProject
 				apiSecret = "REPLACE ME ANDROID SECRET";
          #elif UNITY_IPHONE
           		apiKey = "REPLACE ME IOS KEY";
-				apiSecret = "REPLACE ME IOS SECRET";   
+				apiSecret = "REPLACE ME IOS SECRET";
          #endif
         }
-        
+
         new MParticle().Initialize(new MParticleOptions()
         {
         	ApiKey = apiKey,
@@ -100,7 +133,8 @@ It is now required to initialize the SDK with an MParticleOptions object. MParti
 ```
 
 ##### Initial Identify Request & IdentityStateListeners
-The identity API is an integral part of the mParticle platform. The SDK operates is such a way that requires a current `MParticleUser` to be present. It is explained more in the Android & iOS documentation, but the way we go about ensuring this is to make a call to the `IdentityApi.Identify()` endpoint upon initialization. By default, we use the user identities associated with the current, stored `MParticleUser`, or an empty request if an application is running for the first time. 
+
+The identity API is an integral part of the mParticle platform. The SDK operates is such a way that requires a current `MParticleUser` to be present. It is explained more in the Android & iOS documentation, but the way we go about ensuring this is to make a call to the `IdentityApi.Identify()` endpoint upon initialization. By default, we use the user identities associated with the current, stored `MParticleUser`, or an empty request if an application is running for the first time.
 
 Using `MParticleOptions`, you have an option to override this default behavior, by registering a custom `IdentityApiRequest`.
 
@@ -119,9 +153,8 @@ Additionally, you may set a global OnUserIdentified delegate in `MParticleOption
 			},
 			IdentityStateListener = newUser => Console.WriteLine("New MParticleUser found, Mpid = " + newUser.Mpid);
         });
-        
-```
 
+```
 
 ### Events
 
@@ -145,6 +178,7 @@ MParticle.Instance.LogEvent (new MPEvent("Hello world", EventType.Navigation) {
     }
 );
 ```
+
 #### Commerce Events
 
 The `CommerceEvent` is central to mParticle's eCommerce measurement. `CommerceEvents` can contain many data points but it's important to understand that there are 3 core variations:
@@ -177,7 +211,7 @@ products[1] = new Product("foo name 2", "foo sku 2", 100, 3) {
 	Category = "foo category 2";
 	CouponCode = "foo coupon 2";
 }
-	
+
 TransactionAttributes transactionAttributes = new TransactionAttributes("foo transaction id") {
 	Revenue = 180,
 	Shipping = 10,
@@ -186,8 +220,8 @@ TransactionAttributes transactionAttributes = new TransactionAttributes("foo tra
 	CouponCode = "foo coupon code"
 };
 CommerceEvent eCommEvent = new CommerceEvent (
-    ProductAction.Purchase, 
-    products, 
+    ProductAction.Purchase,
+    products,
     transactionAttributes
 ) {
 	ScreenName = "HomeScreen",
@@ -196,8 +230,9 @@ CommerceEvent eCommEvent = new CommerceEvent (
 		{"key1", "value1"}
 	}
 }
-MParticle.Instance.LogEvent(eCommEvent);       
+MParticle.Instance.LogEvent(eCommEvent);
 ```
+
 #### Screen events
 
 ```cs
@@ -208,7 +243,6 @@ MParticle.Instance.LogScreen("Test screen");
 
 Version 2 of the MParticle Unity SDK supports the full range of IDSync features. For more in depth information about MParticle's Identity features, checkout either the [Android docs](http://docs.mparticle.com/developers/sdk/android/identity/) or the [iOS docs](http://docs.mparticle.com/developers/sdk/ios/identity) on the topic
 
-
 #### Accessing IdentityApi
 
 To get a reference to the `IdentityApi`:
@@ -217,10 +251,9 @@ To get a reference to the `IdentityApi`:
 var identityApi = MParticle.Instance.Identity;
 ```
 
-#### Updating Identities 
+#### Updating Identities
 
-
-User identities allow you to associate specific identifiers with the current user: 
+User identities allow you to associate specific identifiers with the current user:
 
 ```cs
 IdentityApiRequest request = new IdentityApiRequest(identityApi);
@@ -232,7 +265,7 @@ identityApi.Modify(request);
 or
 
 ```cs
-identityApi.Modify(new IdentityApiRequest() 
+identityApi.Modify(new IdentityApiRequest()
                 {
                     UserIdentities = new Dictionary<UserIdentity, string>()
                     {
@@ -289,7 +322,7 @@ When a new user is returned through an identity API request, you may want to tra
 ```cs
 identityApi.Login(new IdentityApiRequest()
             {
-                UserAliasHandler = (previousUser, newUser) => 
+                UserAliasHandler = (previousUser, newUser) =>
                 {
                     // do some stuff, but for example:
                     var persistentAttribute = "persistent user attribute";
